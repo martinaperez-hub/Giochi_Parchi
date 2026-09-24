@@ -3,7 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet">
 <title>Album della Flora degli Habitat — DigitAP</title>
+<script>
+(function(){
+  const KEY='digitap_site_access_v1';
+  if(sessionStorage.getItem(KEY)!=='ok'){
+    location.replace('index.html?next=Album.html');
+  }
+})();
+</script>
+
 <style>
 :root{
   --bg:#f4f3eb; --paper:#fffdf8; --ink:#23302a; --muted:#68756f;

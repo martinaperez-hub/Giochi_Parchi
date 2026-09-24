@@ -3,7 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet">
 <title>Memory della Flora — DigitAP</title>
+<script>
+(function(){
+  const KEY='digitap_site_access_v1';
+  if(sessionStorage.getItem(KEY)!=='ok'){
+    location.replace('index.html?next=Memory.html');
+  }
+})();
+</script>
+
 <style>
 :root{
  --bg:#f6f3e9;--paper:#fffdf8;--ink:#252d28;--muted:#65716a;

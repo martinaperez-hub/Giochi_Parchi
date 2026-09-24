@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="googlebot" content="noindex,nofollow,noarchive,nosnippet">
 <title>Giochi DigitAP</title>
 <style>
 :root{--paper:#fffdf8;--ink:#26332d;--muted:#69766f;--green:#78983e;--green2:#4f7657;--teal:#4b8990;--blue:#63b5d4;--sand:#d9ba78;--line:#d9dfd5;}
@@ -34,9 +36,39 @@ h1{font-family:Georgia,"Palatino Linotype",serif;font-size:clamp(48px,6vw,78px);
 footer{margin-top:20px;text-align:center;color:var(--muted);font-size:12px;line-height:1.4}
 @media(max-width:980px){header{grid-template-columns:1fr 220px}.cards{grid-template-columns:1fr}.card{min-height:300px}}
 @media(max-width:650px){.wrap{width:100%;padding:18px 12px}header{grid-template-columns:1fr;text-align:center}.logo{justify-content:center;order:-1}.logo img{max-width:230px}h1{font-size:48px}.lead{font-size:16px}.card{padding:22px;min-height:320px}}
+
+/* Accesso semplice per GitHub Pages: barriera contro accessi casuali, non autenticazione server-side. */
+.access-gate{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:22px;background:radial-gradient(circle at 10% 10%,rgba(217,186,120,.22),transparent 32%),radial-gradient(circle at 90% 15%,rgba(99,181,212,.18),transparent 34%),linear-gradient(180deg,#f8f6ee 0%,#edf4ef 100%)}
+.access-gate[hidden]{display:none}
+.access-panel{width:min(520px,94vw);background:rgba(255,253,248,.98);border:1px solid var(--line);border-radius:28px;padding:30px 30px 26px;box-shadow:0 24px 60px rgba(44,63,49,.18);text-align:center}
+.access-kicker{font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.access-title{font-family:Georgia,"Palatino Linotype",serif;font-size:38px;line-height:1.02;margin:0 0 8px;color:#231f1d}
+.access-copy{margin:0 auto 20px;max-width:410px;color:var(--muted);font-size:15px;line-height:1.45}
+.access-form{display:grid;grid-template-columns:1fr auto;gap:9px;align-items:center}
+.access-input{width:100%;min-height:50px;border:1px solid #cfd8ce;border-radius:14px;background:#fff;padding:12px 14px;font:inherit;font-size:16px;color:var(--ink);outline:none}
+.access-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(75,137,144,.13)}
+.access-button{min-height:50px;border:0;border-radius:14px;padding:12px 18px;background:linear-gradient(110deg,var(--green2),var(--teal));color:#fff;font:inherit;font-weight:900;cursor:pointer}
+.access-error{min-height:20px;margin-top:9px;color:#a14f3e;font-size:13px;font-weight:800}
+.access-note{margin-top:14px;color:#87918b;font-size:11px;line-height:1.35}
+@media(max-width:560px){.access-panel{padding:24px 18px}.access-title{font-size:32px}.access-form{grid-template-columns:1fr}.access-button{width:100%}}
+
 </style>
 </head>
 <body>
+<div id="accessGate" class="access-gate">
+  <section class="access-panel" aria-labelledby="accessTitle">
+    <div class="access-kicker">DigitAP · Giochi</div>
+    <h1 id="accessTitle" class="access-title">Accesso ai giochi</h1>
+    <p class="access-copy">Inserisci la password per entrare nella pagina con le tre attività.</p>
+    <form id="accessForm" class="access-form" autocomplete="off">
+      <input id="accessPassword" class="access-input" type="password" placeholder="Password" aria-label="Password" autocomplete="current-password" required>
+      <button class="access-button" type="submit">Entra</button>
+    </form>
+    <div id="accessError" class="access-error" role="alert" aria-live="polite"></div>
+    <div class="access-note">L’accesso resta valido finché questa sessione del browser rimane aperta.</div>
+  </section>
+</div>
+
 <main class="wrap">
 <header>
 <div>
@@ -71,5 +103,49 @@ footer{margin-top:20px;text-align:center;color:var(--muted);font-size:12px;line-
 </section>
 <footer>Tre attività interattive realizzate nell’ambito del progetto DigitAP.</footer>
 </main>
+
+<script>
+(function(){
+  const KEY='digitap_site_access_v1';
+  const EXPECTED='d31fbd0cb4920e620d6648b5035094a0bd7bd2aaa197418846c41f1973c6fdef';
+  const gate=document.getElementById('accessGate');
+  const form=document.getElementById('accessForm');
+  const input=document.getElementById('accessPassword');
+  const error=document.getElementById('accessError');
+  const allowed=new Set(['Parchi.html','Memory.html','Album.html']);
+
+  function nextPage(){
+    const q=new URLSearchParams(location.search).get('next');
+    return allowed.has(q) ? q : null;
+  }
+  function unlock(){
+    sessionStorage.setItem(KEY,'ok');
+    const next=nextPage();
+    if(next) location.replace(next);
+    else { gate.hidden=true; document.documentElement.style.overflow=''; }
+  }
+  async function digest(value){
+    const data=new TextEncoder().encode(value);
+    const hash=await crypto.subtle.digest('SHA-256',data);
+    return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  if(sessionStorage.getItem(KEY)==='ok') unlock();
+  else {
+    document.documentElement.style.overflow='hidden';
+    setTimeout(()=>input.focus(),50);
+    form.addEventListener('submit',async function(e){
+      e.preventDefault();
+      error.textContent='';
+      try{
+        if(await digest(input.value)===EXPECTED) unlock();
+        else { error.textContent='Password non corretta.'; input.select(); }
+      }catch(err){
+        error.textContent='Apri questa pagina dal sito GitHub Pages per effettuare l’accesso.';
+      }
+    });
+  }
+})();
+</script>
+
 </body>
 </html>
